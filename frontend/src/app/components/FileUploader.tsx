@@ -1,133 +1,141 @@
 "use client";
-import Papa from "papaparse";
-import { useState, useRef } from "react";
 
-export default function FileUploader({ onSubmit }) {
-  const [text, setText] = useState("");
-  const [isDragOver, setIsDragOver] = useState(false);
-  const [selectedFile, setSelectedFile] = useState(null);
-  const fileInputRef = useRef(null);
+import { Upload } from "lucide-react";
+import { Button } from "./ui/button";
+import { useState, useEffect } from "react";
 
-  const handleFileUpload = (file) => {
+interface FileUploadAreaProps {
+  onFileSelect: (file: File) => void;
+  hasFile: boolean;
+}
+
+export default function FileUploader({
+  onFileSelect,
+  hasFile,
+}: FileUploadAreaProps) {
+  const [displayedText, setDisplayedText] = useState("");
+  const [currentLine, setCurrentLine] = useState(0);
+  const topText = "AI-powered analysis for your CSV data.";
+  const secondaryText = "Upload a CSV file to get started";
+
+  useEffect(() => {
+    let index = 0;
+    let currentText = topText;
+
+    const timer = setInterval(() => {
+      if (currentLine === 0) {
+        // Typing first line
+        if (index < topText.length) {
+          setDisplayedText(topText.slice(0, index + 1));
+          index++;
+        } else {
+          // First line done, wait a bit then move to second line
+          setTimeout(() => {
+            setCurrentLine(1);
+            setDisplayedText("");
+            index = 0;
+          }, 1000);
+        }
+      } else if (currentLine === 1) {
+        // Typing second line
+        if (index < secondaryText.length) {
+          setDisplayedText(secondaryText.slice(0, index + 1));
+          index++;
+        } else {
+          clearInterval(timer);
+        }
+      }
+    }, 50);
+
+    return () => clearInterval(timer);
+  }, [currentLine]);
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
     if (file && file.type === "text/csv") {
-      setSelectedFile(file);
-      Papa.parse(file, {
-        header: true,
-        complete: (results) => {
-          onSubmit({ text, csv: results.data });
-        },
-      });
+      onFileSelect(file);
     }
   };
 
-  const handleFileInputChange = (e) => {
-    const file = e.target.files[0];
-    handleFileUpload(file);
-  };
-
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    setIsDragOver(true);
-  };
-
-  const handleDragLeave = (e) => {
-    e.preventDefault();
-    setIsDragOver(false);
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    setIsDragOver(false);
-    const file = e.dataTransfer.files[0];
-    handleFileUpload(file);
-  };
-
-  const handleButtonClick = () => {
-    fileInputRef.current?.click();
-  };
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Ask My Data</h1>
-          <p className="text-gray-600">Upload your CSV file to get started</p>
-        </div>
-
-        <div
-          className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-            isDragOver
-              ? "border-blue-500 bg-blue-50"
-              : "border-gray-300 hover:border-gray-400"
-          }`}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
+    <div className="flex flex-col items-center justify-center gap-6">
+      <div className="text-center space-y-2">
+        <h1
+          className="text-5xl font-bold py-2"
+          style={{
+            background:
+              "linear-gradient(135deg, hsl(243 80% 62%), hsl(189 94% 43%))",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundClip: "text",
+          }}
         >
-          <div className="space-y-4">
-            <div className="mx-auto w-12 h-12 text-gray-400">
-              <svg
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
+          AskMyData
+        </h1>
+        <div className="text-lg min-h-[3rem] flex flex-col items-center">
+          <p className="min-h-[1.5rem]" style={{ color: "hsl(243 80% 62%)" }}>
+            {currentLine === 0 ? displayedText : topText}
+            {currentLine === 0 && (
+              <span
+                style={{
+                  animation: "blink 1s infinite",
+                }}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                />
-              </svg>
-            </div>
-
-            <div>
-              <button
-                onClick={handleButtonClick}
-                className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-              >
-                Choose CSV File
-              </button>
-              <p className="mt-2 text-sm text-gray-500">
-                or drag and drop your file here
-              </p>
-            </div>
-
-            {selectedFile && (
-              <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md">
-                <p className="text-sm text-green-800">
-                  ✓ {selectedFile.name} selected
-                </p>
-              </div>
+                |
+              </span>
             )}
-          </div>
-
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".csv"
-            onChange={handleFileInputChange}
-            className="hidden"
-          />
-        </div>
-
-        <div className="mt-6">
-          <label
-            htmlFor="description"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
-            Description (optional)
-          </label>
-          <textarea
-            id="description"
-            placeholder="Describe your data or what you'd like to analyze..."
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            rows={3}
-            className="text-black w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-          />
+          </p>
+          <p className="min-h-[1.5rem]" style={{ color: "hsl(243 80% 62%)" }}>
+            {currentLine === 1 ? displayedText : ""}
+            {currentLine === 1 && (
+              <span
+                style={{
+                  animation: "blink 1s infinite",
+                }}
+              >
+                |
+              </span>
+            )}
+          </p>
         </div>
       </div>
+      <div className="relative">
+        <input
+          type="file"
+          accept=".csv"
+          onChange={handleFileChange}
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+          id="file-upload"
+        />
+        <Button
+          variant="default"
+          size="lg"
+          className="hover:opacity-90 transition-opacity text-lg px-8 py-6"
+          style={{
+            background:
+              "linear-gradient(135deg, hsl(243 80% 62%), hsl(243 80% 75%))",
+            boxShadow: "0 8px 24px hsl(243 80% 62% / 0.12)",
+            color: "white",
+          }}
+          asChild
+        >
+          <label
+            htmlFor="file-upload"
+            className="cursor-pointer flex items-center gap-3"
+          >
+            <Upload className="h-6 w-6" />
+            {hasFile ? "Change CSV File" : "Upload CSV File"}
+          </label>
+        </Button>
+      </div>
+      {hasFile && (
+        <div
+          className="text-sm font-medium animate-in fade-in duration-300"
+          style={{ color: "hsl(189 94% 43%)" }}
+        >
+          ✓ CSV file uploaded successfully
+        </div>
+      )}
     </div>
   );
 }
