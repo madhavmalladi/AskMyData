@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ArrowRight } from "lucide-react";
+import Image from "next/image";
 import FileUploader from "./components/FileUploader";
 import Dashboard from "./components/Dashboard";
 import Papa from "papaparse";
@@ -10,7 +11,7 @@ export default function Page() {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [showDashboard, setShowDashboard] = useState(false);
   const [aiDirections, setAiDirections] = useState("");
-  const [parsedCSVData, setParsedCSVData] = useState<any[]>([]);
+  const [parsedCSVData, setParsedCSVData] = useState<Record<string, unknown>[]>([]);
   const [CSVError, setCSVerror] = useState<string | null>(null);
 
   const handleFileSelect = async (file: File) => {
@@ -30,7 +31,7 @@ export default function Page() {
         console.warn("CSV warnings: ", parsedData.errors);
       }
 
-      setParsedCSVData(parsedData.data);
+      setParsedCSVData(parsedData.data as Record<string, unknown>[]);
       console.log("Parsed CSV data:", parsedData.data);
       console.log("CSV columns:", Object.keys(parsedData.data[0] || {}));
     } catch (error) {
@@ -74,19 +75,23 @@ export default function Page() {
       {/* Images section */}
       <div className="relative z-10 flex items-center justify-center pt-20 -mb-23">
         <div className="flex items-center gap-8">
-          <img
+          <Image
             src="/csv_image.png"
             alt="CSV Data"
-            className="w-32 h-32 object-contain"
+            width={128}
+            height={128}
+            className="object-contain"
           />
           <ArrowRight
             className="w-8 h-8"
             style={{ color: "hsl(243 80% 62%)" }}
           />
-          <img
+          <Image
             src="/data_visualization.png"
             alt="Data Visualization"
-            className="w-32 h-32 object-contain"
+            width={128}
+            height={128}
+            className="object-contain"
           />
         </div>
       </div>

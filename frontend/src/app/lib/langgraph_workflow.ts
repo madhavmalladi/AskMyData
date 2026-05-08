@@ -1,6 +1,6 @@
 interface WorkflowInput {
   text: string;
-  csv: any;
+  csv: Record<string, unknown>[];
 }
 
 export interface ChartData {
@@ -14,7 +14,7 @@ export interface ChartData {
 
 interface WorkflowResult {
   text: string;
-  csv: any;
+  csv: Record<string, unknown>[];
   reasoning: string;
   csv_analysis: string;
   chart_data: ChartData;

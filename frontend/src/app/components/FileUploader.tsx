@@ -27,7 +27,6 @@ export default function FileUploader({
 
   useEffect(() => {
     let index = 0;
-    let currentText = topText;
 
     const timer = setInterval(() => {
       if (currentLine === 0) {
