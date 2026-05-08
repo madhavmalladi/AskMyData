@@ -6,7 +6,6 @@ import json
 import os
 from dotenv import load_dotenv
 
-# Load environment variables before instantiating agents
 load_dotenv()
 os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
 

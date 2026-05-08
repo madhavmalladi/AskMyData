@@ -1,25 +1,62 @@
 "use client";
 
 import { useState } from "react";
-import { MessageSquare, ArrowRight } from "lucide-react";
-import { Button } from "./components/ui/button";
-import ChatWindow from "./components/ChatWindow";
+import { ArrowRight } from "lucide-react";
 import FileUploader from "./components/FileUploader";
+import Dashboard from "./components/Dashboard";
+import Papa from "papaparse";
 
 export default function Page() {
-  const [isChatOpen, setIsChatOpen] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [showDashboard, setShowDashboard] = useState(false);
+  const [aiDirections, setAiDirections] = useState("");
+  const [parsedCSVData, setParsedCSVData] = useState<any[]>([]);
+  const [CSVError, setCSVerror] = useState<string | null>(null);
 
-  const handleFileSelect = (file: File) => {
+  const handleFileSelect = async (file: File) => {
     setUploadedFile(file);
+    setCSVerror(null);
+
+    try {
+      const text = await file.text();
+      const parsedData = Papa.parse(text, {
+        header: true,
+        skipEmptyLines: true,
+        transformHeader: (header) => header.trim(),
+        dynamicTyping: true,
+      });
+
+      if (parsedData.errors.length > 0) {
+        console.warn("CSV warnings: ", parsedData.errors);
+      }
+
+      setParsedCSVData(parsedData.data);
+      console.log("Parsed CSV data:", parsedData.data);
+      console.log("CSV columns:", Object.keys(parsedData.data[0] || {}));
+    } catch (error) {
+      console.error("Error: ", error);
+      setCSVerror("Failed to parse CSV file. Please check the file format");
+      setParsedCSVData([]);
+    }
   };
+
+  // Show Dashboard if user wants to see it
+  if (showDashboard) {
+    return (
+      <Dashboard
+        uploadedFile={uploadedFile}
+        aiDirections={aiDirections}
+        parsedCSVData={parsedCSVData}
+      />
+    );
+  }
 
   return (
     <div
       className="min-h-screen relative"
       style={{
         background:
-          "linear-gradient(135deg, hsl(240 20% 99%) 0%, hsl(243 80% 62% / 0.05) 50%, hsl(189 94% 43% / 0.05) 100%)",
+          "linear-gradient(135deg, hsl(220 100% 97%) 0%, hsl(243 80% 62% / 0.15) 50%, hsl(189 94% 43% / 0.1) 100%)",
       }}
     >
       {/* Background decorative elements */}
@@ -59,32 +96,18 @@ export default function Page() {
         <FileUploader
           onFileSelect={handleFileSelect}
           hasFile={!!uploadedFile}
+          onGenerateDashboard={() => setShowDashboard(true)}
+          aiDirections={aiDirections}
+          onAiDirectionsChange={setAiDirections}
         />
+
+        {/* Error display */}
+        {CSVError && (
+          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            {CSVError}
+          </div>
+        )}
       </div>
-
-      {/* Floating chat button */}
-      {!isChatOpen && (
-        <Button
-          onClick={() => setIsChatOpen(true)}
-          className="fixed right-6 top-6 hover:opacity-90 transition-opacity z-40"
-          style={{
-            background:
-              "linear-gradient(135deg, hsl(189 94% 43%), hsl(189 94% 60%))",
-            boxShadow: "0 8px 24px hsl(243 80% 62% / 0.12)",
-          }}
-          size="lg"
-        >
-          <MessageSquare className="mr-2 h-5 w-5" />
-          Open Chat
-        </Button>
-      )}
-
-      {/* Chat window */}
-      <ChatWindow
-        isOpen={isChatOpen}
-        onClose={() => setIsChatOpen(false)}
-        hasCSV={!!uploadedFile}
-      />
     </div>
   );
 }

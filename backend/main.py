@@ -10,9 +10,11 @@ os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
 app = FastAPI()
 
 # Allow frontend access
+origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Replace with domain later
+    allow_origins=origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )

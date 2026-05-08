@@ -3,8 +3,8 @@ interface WorkflowInput {
   csv: any;
 }
 
-interface ChartData {
-  chartType: "bar" | "line" | "pie" | "scatter";
+export interface ChartData {
+  chartType: "bar" | "line" | "pie" | "scatter" | "area";
   title: string;
   data: Array<{ label: string; value: number }>;
   xAxis?: string;
@@ -26,7 +26,8 @@ export async function runLangGraphWorkflow({
   csv,
 }: WorkflowInput): Promise<WorkflowResult> {
   try {
-    const res = await fetch("http://localhost:8000/run", {
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:8000";
+    const res = await fetch(`${backendUrl}/run`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text, csv }),
@@ -40,6 +41,6 @@ export async function runLangGraphWorkflow({
     return data;
   } catch (error) {
     console.error("Error running LangGraph workflow:", error);
-    throw error; // Re-throw or handle appropriately
+    throw error;
   }
 }

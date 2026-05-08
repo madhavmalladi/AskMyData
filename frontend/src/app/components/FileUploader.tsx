@@ -2,16 +2,23 @@
 
 import { Upload } from "lucide-react";
 import { Button } from "./ui/button";
+import { Input } from "./ui/input";
 import { useState, useEffect } from "react";
 
 interface FileUploadAreaProps {
   onFileSelect: (file: File) => void;
   hasFile: boolean;
+  onGenerateDashboard?: () => void;
+  aiDirections: string;
+  onAiDirectionsChange: (directions: string) => void;
 }
 
 export default function FileUploader({
   onFileSelect,
   hasFile,
+  onGenerateDashboard,
+  aiDirections,
+  onAiDirectionsChange,
 }: FileUploadAreaProps) {
   const [displayedText, setDisplayedText] = useState("");
   const [currentLine, setCurrentLine] = useState(0);
@@ -129,11 +136,52 @@ export default function FileUploader({
         </Button>
       </div>
       {hasFile && (
-        <div
-          className="text-sm font-medium animate-in fade-in duration-300"
-          style={{ color: "hsl(189 94% 43%)" }}
-        >
-          ✓ CSV file uploaded successfully
+        <div className="flex flex-col items-center gap-4 w-full max-w-md">
+          <div
+            className="text-sm font-medium animate-in fade-in duration-300"
+            style={{ color: "hsl(189 94% 43%)" }}
+          >
+            ✓ CSV file uploaded successfully
+          </div>
+
+          <div className="w-full">
+            <label
+              htmlFor="ai-directions"
+              className="block text-sm font-medium mb-2"
+              style={{ color: "hsl(243 80% 62%)" }}
+            >
+              AI Directions (Optional)
+            </label>
+            <Input
+              id="ai-directions"
+              type="text"
+              placeholder="e.g., Focus on sales trends, create pie charts for categories..."
+              value={aiDirections}
+              onChange={(e) => onAiDirectionsChange(e.target.value)}
+              className="w-full"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Give the AI specific instructions for your dashboard
+            </p>
+          </div>
+
+          <Button
+            onClick={() => {
+              if (onGenerateDashboard) {
+                onGenerateDashboard();
+              }
+            }}
+            className="hover:opacity-90 transition-opacity text-sm px-6 py-3"
+            style={{
+              background:
+                "linear-gradient(135deg, hsl(243 80% 62%), hsl(243 80% 75%))",
+              boxShadow: "0 4px 12px hsl(243 80% 62% / 0.12)",
+              color: "white",
+            }}
+            size="sm"
+          >
+            Generate Dashboard
+          </Button>
         </div>
       )}
     </div>
