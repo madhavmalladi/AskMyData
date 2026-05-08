@@ -10,7 +10,7 @@ os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
 app = FastAPI()
 
 # Allow frontend access
-origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(",")
+origins = os.getenv("ALLOWED_ORIGINS", "https://ask-my-data-5lvkon0ze-madhavmalladis-projects.vercel.app/").split(",")
 
 app.add_middleware(
     CORSMiddleware,
