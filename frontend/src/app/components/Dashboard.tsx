@@ -9,7 +9,7 @@ import { runLangGraphWorkflow, ChartData } from "../lib/langgraph_workflow";
 interface DashboardProps {
   uploadedFile?: File | null;
   aiDirections?: string;
-  parsedCSVData?: any[];
+  parsedCSVData?: Record<string, unknown>[];
 }
 
 export default function Dashboard({
@@ -21,10 +21,9 @@ export default function Dashboard({
   const [validationIssues, setValidationIssues] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [hasFile, setHasFile] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(true);
 
-  const handleSubmit = async ({ text, csv }: { text: string; csv: any[] }) => {
+  const handleSubmit = async ({ text, csv }: { text: string; csv: Record<string, unknown>[] }) => {
     setLoading(true);
     setError(null);
 
@@ -54,7 +53,7 @@ export default function Dashboard({
         csv: parsedCSVData,
       });
     }
-  }, [parsedCSVData, aiDirections]);
+  }, [parsedCSVData, aiDirections]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white relative">

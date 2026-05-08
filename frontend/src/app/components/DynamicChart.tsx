@@ -16,6 +16,7 @@ import {
   Scatter,
   AreaChart,
   Area,
+  type PieLabelRenderProps,
 } from "recharts";
 import { ChartData } from "../lib/langgraph_workflow";
 
@@ -168,8 +169,8 @@ export default function DynamicChart({ data }: DynamicChartProps) {
               cx="50%"
               cy="50%"
               labelLine={false}
-              label={({ name, percent }: { name: string; percent: number }) =>
-                `${name} (${(percent * 100).toFixed(1)}%)`
+              label={({ name, percent }: PieLabelRenderProps) =>
+                `${name ?? ""} (${((percent ?? 0) * 100).toFixed(1)}%)`
               }
               outerRadius={100}
               fill="#8884d8"
@@ -233,7 +234,7 @@ export default function DynamicChart({ data }: DynamicChartProps) {
                 Unsupported Chart Type
               </p>
               <p className="text-yellow-600 text-xs">
-                Chart type "{chartData.chartType}" is not supported
+                Chart type &quot;{chartData.chartType}&quot; is not supported
               </p>
             </div>
           </div>

@@ -17,7 +17,7 @@ interface ChatWindowProps {
   isOpen: boolean;
   onClose: () => void;
   hasCSV: boolean;
-  csvData?: any[];
+  csvData?: Record<string, unknown>[];
 }
 
 export default function ChatWindow({ isOpen, onClose, hasCSV, csvData = [] }: ChatWindowProps) {
@@ -57,7 +57,8 @@ export default function ChatWindow({ isOpen, onClose, hasCSV, csvData = [] }: Ch
 
     try {
       // Call your existing LangGraph workflow
-      const response = await fetch("http://localhost:8000/run", {
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:8000";
+      const response = await fetch(`${backendUrl}/run`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -209,7 +210,7 @@ export default function ChatWindow({ isOpen, onClose, hasCSV, csvData = [] }: Ch
           <Input
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            onKeyPress={handleKeyPress}
+            onKeyDown={handleKeyPress}
             placeholder={hasCSV ? "Ask about your data..." : "Upload CSV first..."}
             disabled={!hasCSV || isLoading}
             className="flex-1 bg-white border-gray-200 text-black placeholder-gray-500"
